@@ -1,0 +1,27 @@
+name: nw
+description: A new Flutter project.
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.0.0-dev.68.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  flutter_localizations:
+    sdk: flutter
+
+  cupertino_icons: ^0.1.2
+  translator: ^0.1.0+4
+  path_provider: ^0.4.1
+  contacts_service: ^0.0.8
+  simple_permissions: ^0.1.6
+  
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
