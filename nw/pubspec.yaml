@@ -17,6 +17,7 @@ dependencies:
   path_provider: ^0.4.1
   contacts_service: ^0.0.8
   simple_permissions: ^0.1.6
+  # speech_recognition: ^0.2.0+1
   
 
 dev_dependencies:

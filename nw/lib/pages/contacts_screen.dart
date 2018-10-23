@@ -11,26 +11,21 @@ class ContactScreen extends StatefulWidget {
 }
 
 class ContactScreenState extends State<ContactScreen> {
-  // var _isLoading = true;
   List<Contact> _contacts;
-
-  // ContactScreenState() {
-  //   initTempList();
-  // }
+  //static List<Contact> temp;
 
   @override
   initState() {
 
     loadContacts();
     super.initState();
-    //  initPermissions();
   }
 
   @override
   Widget build(BuildContext context) {
     return Container(
       child: SafeArea(
-        child: _contacts != null /* || (_contacts.elementAt(0).identifier != "empty_list_of_contacts") */
+        child: _contacts != null
             ? ListView.builder(
                 itemCount: _contacts?.length ?? 0,
                 itemBuilder: (BuildContext context, int index) {
@@ -39,7 +34,7 @@ class ContactScreenState extends State<ContactScreen> {
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
                           builder: (BuildContext context) =>
-                              ChatRoom() //ChatRoom(c)
+                              ChatRoom(chatContact: c) //ChatRoom(c)
                           ));
                     },
                     leading: (c.avatar != null && c.avatar.length > 0)
@@ -58,27 +53,38 @@ class ContactScreenState extends State<ContactScreen> {
   }
 
   loadContacts() async {
-    var listaOfUsers = await io.getUserList();
+    var listOfUsers = await io.getUserList();
 
     var iter = await ContactsService.getContacts();
     var contacts = iter.toList();
     var users = List<Contact>();
     
-    for(var i=0; i<(listaOfUsers?.length ?? 0); i++) {
+    // for(var i=0; i<(listOfUsers?.length ?? 0); i++) {         
+    for(var i=0; i<(contacts?.length ?? 0); i++) {
 
       var phones = contacts[i].phones.toList();
 
-      for(var j=0; j<(phones?.length ?? 0); j++) {
-        if(listaOfUsers[i]["phoneNumber"] == phones[j]) {
-          users?.add(contacts[i]);
+      for(var j=0; j<listOfUsers.length; j++) {  
+       // print(phones[j].value);
+       for(var k=0; k<phones.length; k++) {
+          if(listOfUsers[j]["phoneNumber"] == phones[k].value) {
+            users.add(contacts[i]);
+         // print("contato $i: ${contacts[i]}");
+          }
         }
       }
     }
 
     setState(() {
-      if ((users?.length ?? 0) > 0) _contacts = users;
-      else _contacts = List()..add(nullContact());
+      if ((users?.length ?? 0) > 0) {
+        _contacts = users;
+      }
+      else {
+        _contacts = List()..add(nullContact());
+      }
     });
+    
+    //temp = users;
   }
 
   @override
@@ -88,7 +94,7 @@ class ContactScreenState extends State<ContactScreen> {
 
   Contact nullContact() {
     Map map = {
-      "displayName": "Null",
+      "displayName": "Teste",
       "identifier" : "empty_list",
     };
     return Contact.fromMap(map);

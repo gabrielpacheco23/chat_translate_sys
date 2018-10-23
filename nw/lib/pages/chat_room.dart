@@ -3,11 +3,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:nw/pages/message.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:nw/models/chat_model.dart';
+// import 'package:nw/models/chat_model.dart';
 import 'package:translator/translator.dart';
+import 'package:contacts_service/contacts_service.dart';
 
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
+
+// import 'package:nw/audio/speech_recognizer.dart';
+import 'package:nw/pages/speech_rec.dart';
 
 /// CHAT WINDOW/ CHAT WITH SOMEONES WINDOW           (v1)
 /// 
@@ -37,6 +41,9 @@ import 'package:web_socket_channel/io.dart';
 class ChatRoom extends StatefulWidget {
   @override
   ChatRoomState createState() => ChatRoomState();
+  
+  ChatRoom({this.chatContact});
+  final Contact chatContact;
 }
 
 class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
@@ -52,13 +59,14 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       try {
         // channel = IOWebSocketChannel.connect('ws://192.168.0.15:8888/connect');   //change to local IP
         channel = IOWebSocketChannel.connect('ws://ts-websocket-server.herokuapp.com/connect');
-        print("Conectado a ${dummyData[0].name}");
+        // print("Conectado a ${dummyData[0].name}");
+        print("Conectado a ${widget.chatContact?.displayName ?? 'John'}");
 
         // listen for data coming from server -> then display text in chat room
         channel.stream.listen((data) => setState(() => displayMsg(data as String)/* _submitMsg(data as String) */));
       }
       catch(e) {
-        print("Erro: Não foi possivel conectar ao WS");
+        print("Erro: Não foi possivel conectar ao servidor WS");
       }
     }
 
@@ -67,7 +75,8 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     return Scaffold(
       appBar: AppBar(
         // avatar
-        title: Text("${dummyData[0].name}"),
+        // title: Text("${dummyData[0].name}"),
+        title: Text("${widget.chatContact?.displayName ?? 'John'}"),
         elevation: Theme.of(context).platform == TargetPlatform.iOS ? 0.0 : 6.0,
       ),
       body: Column(children: <Widget>[
@@ -108,6 +117,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                   onSubmitted: _submitMsg,
                   decoration: InputDecoration.collapsed(
                       hintText: "Digite aqui para enviar a mensagem"),
+                  autofocus: true,
                 ),
               ),
               Container(
@@ -123,7 +133,25 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
                               color: _isWriting ? Colors.blue : null),
                           onPressed: _isWriting
                               ? () => _sendDataToServer()// _submitMsg(_textController.text);
-                              : null))
+                              : null)),
+
+              // excluir se der erro
+              Container(
+                  margin: EdgeInsets.symmetric(horizontal: 3.0),
+                  child: Theme.of(context).platform == TargetPlatform.iOS
+                      ? CupertinoButton(
+                          child: Text("Gravar"),
+                          onPressed: () => Navigator.push(context, MaterialPageRoute(
+                            builder: (context) => SpeechRec())))
+                      : IconButton(
+                          icon: Icon(Icons.mic,
+                              color: Colors.blue),
+                              onPressed: () => Navigator.push(context, MaterialPageRoute(
+                                builder: (context) => SpeechRec()
+                              )),
+                      //)
+                  )
+              ),
             ],
           ),
           decoration: Theme.of(context).platform == TargetPlatform.iOS
@@ -143,6 +171,7 @@ class ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       txt: await translateTxt(txt, to: 'en'),
       animationController: AnimationController(
           vsync: this, duration: Duration(milliseconds: 500)),
+      name: widget.chatContact?.displayName ?? null,
     );
 
     setState(() {
